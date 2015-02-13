@@ -84,7 +84,7 @@ if (!CacheStorage.prototype.match) {
 
 self.oninstall = function(event) {
   event.waitUntil(
-    caches.open('ct-v2').then(function(cache) {
+    caches.open('ct-v3').then(function(cache) {
       return cache.addAll([
         '/connectivity-tracker/src/'
       ]);
@@ -93,7 +93,7 @@ self.oninstall = function(event) {
 };
 
 var expectedCaches = [
-  'ct-v2'
+  'ct-v3'
 ];
 
 self.onactivate = function(event) {
