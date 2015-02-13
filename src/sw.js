@@ -84,7 +84,7 @@ if (!CacheStorage.prototype.match) {
 
 self.oninstall = function(event) {
   event.waitUntil(
-    caches.open('ct-v3').then(function(cache) {
+    caches.open('ct-v4').then(function(cache) {
       return cache.addAll([
         '/connectivity-tracker/src/'
       ]);
@@ -93,7 +93,8 @@ self.oninstall = function(event) {
 };
 
 var expectedCaches = [
-  'ct-v3'
+  'ct-v4',
+  'ct-imgs'
 ];
 
 self.onactivate = function(event) {
@@ -116,18 +117,36 @@ self.onactivate = function(event) {
 };
 
 self.onfetch = function(event) {
-  event.respondWith(
-    caches.match(event.request, {
-      ignoreVary: true
-    })
-  );
+  var requestURL = new URL(event.request.url);
+  
+  if (/\.c\.photoshelter\.com$/.test(requestURL.hostname)) {
+    event.respondWith(imageResponse(event.request));
+  }
+  else {
+    event.respondWith(
+      caches.match(event.request, {
+        ignoreVary: true
+      })
+    );
+  }
 };
 
+function imageResponse(request) {
+  return caches.match(request).then(function(response) {
+    if (response) {
+      return response;
+    }
 
-self.addEventListener('install', function(e) {
-  console.log('Install event:', e);
-});
+    return fetch(request.clone()).then(function(response) {
+      caches.open('ct-imgs').then(function(cache) {
+        cache.put(request, response).then(function() {
+          console.log('yey img cache');
+        }, function() {
+          console.log('nay img cache');
+        });
+      });
 
-self.addEventListener('activate', function(e) {
-  console.log('Activate event:', e);
-});
+      return response.clone();
+    });
+  });
+}
