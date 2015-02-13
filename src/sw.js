@@ -8,6 +8,14 @@ self.oninstall = function(event) {
   );
 };
 
+self.onfetch = function(event) {
+  event.respondWith(
+    caches.match(event.request, {
+      ignoreVary: true
+    })
+  );
+};
+
 
 self.addEventListener('install', function(e) {
   console.log('Install event:', e);
