@@ -138,13 +138,17 @@ function imageResponse(request) {
     }
 
     return fetch(request.clone()).then(function(response) {
-      caches.open('ct-imgs').then(function(cache) {
-        cache.put(request, response).then(function() {
-          console.log('yey img cache');
-        }, function() {
-          console.log('nay img cache');
+      if (response.status < 400) {
+        caches.open('ct-imgs').then(function(cache) {
+          cache.put(request, response).then(function() {
+            console.log('yey img cache');
+          }, function() {
+            console.log('nay img cache');
+          });
         });
-      });
+      else {
+        console.log('returned: ', response.status);
+      }
 
       return response.clone();
     });
